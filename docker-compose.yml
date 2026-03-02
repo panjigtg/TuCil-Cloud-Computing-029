@@ -1,0 +1,52 @@
+services:
+  web:
+    build: ./flask_app
+    container_name: web-flask
+    expose:
+      - "5000"
+    environment:
+      - INSTANCE_NAME=Flask-App
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  web2:
+    build: ./node_app
+    container_name: web-node
+    expose:
+      - "3000"
+    environment:
+      - INSTANCE_NAME=Node-App
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  web3:
+    build: ./php_app
+    container_name: web-php
+    expose:
+      - "80"
+    environment:
+      - INSTANCE_NAME=PHP-App
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-lb
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+      - web2
+      - web3
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
