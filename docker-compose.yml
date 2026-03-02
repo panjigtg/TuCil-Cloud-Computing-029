@@ -1,6 +1,6 @@
 services:
   web:
-    build: ./flask_app
+    build: ./web1
     container_name: web-flask
     expose:
       - "5000"
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   web2:
-    build: ./node_app
+    build: ./web2
     container_name: web-node
     expose:
       - "3000"
@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   web3:
-    build: ./php_app
+    build: ./web3
     container_name: web-php
     expose:
       - "80"
