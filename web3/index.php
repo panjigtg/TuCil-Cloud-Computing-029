@@ -5,7 +5,7 @@ $instance = getenv('INSTANCE_NAME') ?: 'Unknown';
 echo "<!DOCTYPE html>
 <html>
 <head>
-    <title>Load Balancer Test</title>
+    <title>localhost</title>
     <style>
         body {
             font-family: Arial, sans-serif;

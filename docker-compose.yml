@@ -1,7 +1,6 @@
 services:
   web:
     build: ./web1
-    container_name: web-flask
     expose:
       - "5000"
     environment:
@@ -12,7 +11,6 @@ services:
 
   web2:
     build: ./web2
-    container_name: web-node
     expose:
       - "3000"
     environment:
@@ -23,7 +21,6 @@ services:
 
   web3:
     build: ./web3
-    container_name: web-php
     expose:
       - "80"
     environment:
