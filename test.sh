@@ -1,18 +1,28 @@
 #!/bin/bash
 
-for i in {1..15}; do 
-  echo "Request #$i:"
-  response=$(curl -s http://localhost)
-  
+URL="http://localhost"
+JUMLAH_REQUEST=500 
+DELAY=0.1       
 
-  if echo "$response" | grep -q "<!DOCTYPE html>"; then
-    # Ekstrak container ID dari HTML
-    container=$(echo "$response" | grep -oP 'Container: \K[a-f0-9]+')
-    echo "Response from PHP-App (Container: $container)"
-  else
-    # Print text biasa (Flask/Node)
-    echo "$response"
-  fi
-  
-  echo "---"
+for ((i=1; i<=JUMLAH_REQUEST; i++))
+do
+    NAMA="siswa_ke_$i"
+    
+
+    curl -s -X POST "$URL/api/login" \
+         -H "Content-Type: application/json" \
+         -d "{\"username\":\"$NAMA\"}" \
+         -c "cookies_$i.txt" > /dev/null
+
+    PASLON=$(( ( RANDOM % 3 )  + 1 ))
+
+    RESPONSE=$(curl -s -X POST "$URL/api/vote" \
+         -H "Content-Type: application/json" \
+         -d "{\"paslon\":$PASLON}" \
+         -b "cookies_$i.txt")
+
+    echo "[$i/$JUMLAH_REQUEST] $NAMA memilih Paslon 0$PASLON -> $RESPONSE"
+    rm "cookies_$i.txt"
+
+    sleep $DELAY
 done

@@ -1,13 +1,16 @@
-FROM php:8.2-apache
+FROM php:8.2-alpine
 
+RUN apk add --no-cache pcre-dev $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del pcre-dev $PHPIZE_DEPS
 # Copy files
 COPY index.php /var/www/html/
-
-# Enable apache mod_rewrite (optional)
-RUN a2enmod rewrite
 
 # Set correct permissions
 RUN chown -R www-data:www-data /var/www/html
 
 # Expose port
 EXPOSE 80
+
+CMD ["php", "-S", "0.0.0.0:80"]

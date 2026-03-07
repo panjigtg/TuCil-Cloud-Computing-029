@@ -1,0 +1,43 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+/* Custom utility untuk border neomorphic */
+@layer utilities {
+  .border-3 {
+    border-width: 3px;
+  }
+
+  .shadow-neo {
+    box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  }
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-black;
+}
+
+/* Focus states untuk accessibility */
+input:focus,
+button:focus {
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Selection styling */
+::selection {
+  @apply bg-black text-white;
+}
