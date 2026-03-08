@@ -1,12 +1,12 @@
 #!/bin/bash
 
 URL="http://localhost"
-JUMLAH_REQUEST=500 
+JUMLAH_REQUEST=1000 
 DELAY=0.1       
 
 for ((i=1; i<=JUMLAH_REQUEST; i++))
 do
-    NAMA="siswa_ke_$i"
+    NAMA="siswa_$i"
     
 
     curl -s -X POST "$URL/api/login" \

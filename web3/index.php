@@ -3,12 +3,10 @@
 $redis = new Redis();
 $redis->connect('redis-cache', 6379);
 
-// Ambil skor ketiga paslon
 $skor1 = $redis->get('skor:paslon1') ?: 0;
 $skor2 = $redis->get('skor:paslon2') ?: 0;
-$skor3 = $redis->get('skor:paslon3') ?: 0; // <-- Ini dia Paslon 3!
+$skor3 = $redis->get('skor:paslon3') ?: 0; 
 
-// Cari tahu siapa saja yang sudah nyoblos
 $voters = $redis->keys('voted:*');
 $total_voters = count($voters);
 ?>
@@ -17,14 +15,31 @@ $total_voters = count($voters);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin - Ruang Hokage</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style>
+        /* Backup style jika Tailwind gagal load */
+        .nav-item { border-radius: 0; }
+    </style>
 </head>
 <body class="bg-gray-100 text-black font-sans p-10 selection:bg-black selection:text-white">
+    
+    <nav class="bg-white border-b-4 border-black p-4 mb-6 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="font-black text-xl tracking-tighter italic">
+                <a href="/">HOKAGE_VOTE</a>
+            </div>
+            <div id="nav-links" class="flex gap-2 md:gap-4 font-bold uppercase text-xs md:text-sm">
+                <a href="/" data-path="/" class="nav-item border-2 border-transparent px-3 py-1 transition-all">Bilik Suara</a>
+                <a href="/scoreboard" data-path="/scoreboard" class="nav-item border-2 border-transparent px-3 py-1 transition-all">Scoreboard</a>
+                <a href="/admin" data-path="/admin" class="nav-item border-2 border-transparent px-3 py-1 transition-all">Admin</a>
+            </div>
+        </div>
+    </nav>
 
     <div class="max-w-4xl mx-auto border-4 border-black p-8 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div class="flex justify-between items-center border-b-4 border-black pb-4 mb-6">
-            <h1 class="text-3xl font-black uppercase">Ruang Kepala Sekolah</h1>
+            <h1 class="text-3xl font-black uppercase">Ruang Hokage</h1>
             <span class="bg-black text-white px-3 py-1 font-mono text-sm">SERVER PHP ADMIN</span>
         </div>
 
@@ -68,5 +83,31 @@ $total_voters = count($voters);
         </button>
     </div>
 
+    <script>
+        // Gunakan script murni tanpa is:inline karena ini PHP
+        function updateActiveNav() {
+            // Kita normalize path agar /admin/ dan /admin dianggap sama
+            const currentPath = window.location.pathname.replace(/\/$/, ""); 
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                let itemPath = item.getAttribute('data-path').replace(/\/$/, "");
+                
+                // Cek kecocokan path
+                const isActive = (itemPath === "" && currentPath === "") || 
+                                 (itemPath !== "" && currentPath.startsWith(itemPath));
+
+                if (isActive) {
+                    item.classList.add('bg-black', 'text-white', 'border-black');
+                    item.classList.remove('text-black', 'border-transparent');
+                } else {
+                    item.classList.remove('bg-black', 'text-white', 'border-black');
+                    item.classList.add('text-black', 'border-transparent', 'hover:border-black');
+                }
+            });
+        }
+
+        window.onload = updateActiveNav;
+    </script>
 </body>
 </html>

@@ -1,0 +1,146 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="LIVE SCOREBOARD - BRUTALIST CTF">
+    <main class="bg-white p-6 md:p-10 rounded-2xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-6xl w-full border-4 border-black mx-auto mt-4">
+        <header class="flex justify-between items-center mb-8 border-b-4 border-black pb-4">
+            <div>
+                <h1 class="text-3xl font-black uppercase italic tracking-tighter">Election Real-time Tracker</h1>
+                <p class="text-xs font-bold text-gray-500 uppercase">Mode: Time-Series Analysis / Source: Redis</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-black"></span>
+                </span>
+                <span id="status" class="font-black text-xs uppercase">Live Connection</span>
+            </div>
+        </header>
+
+        <div class="border-4 border-black bg-white mb-8 p-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <div class="h-[400px] w-full">
+                <canvas id="ctfLineChart"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="border-4 border-black p-4 bg-white hover:bg-black hover:text-white transition-colors group">
+                <h3 class="font-black uppercase text-xs mb-2">Kandidat 01</h3>
+                <p id="stat1" class="text-5xl font-black">0</p>
+            </div>
+            <div class="border-4 border-black p-4 bg-white hover:bg-black hover:text-white transition-colors group">
+                <h3 class="font-black uppercase text-xs mb-2">Kandidat 02</h3>
+                <p id="stat2" class="text-5xl font-black">0</p>
+            </div>
+            <div class="border-4 border-black p-4 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                <h3 class="font-bold uppercase text-xs mb-2 opacity-70">Kandidat 03</h3>
+                <p id="stat3" class="text-5xl font-black">0</p>
+            </div>
+        </div>
+    </main>
+
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/luxon"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script is:inline>
+        const ctx = document.getElementById('ctfLineChart').getContext('2d');
+        
+        let savedHistory = JSON.parse(localStorage.getItem('ctf_history')) || {
+            labels: [], d1: [], d2: [], d3: []
+        };
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: savedHistory.labels,
+                datasets: [
+                    { label: 'PASLON 01', borderColor: '#000000', backgroundColor: '#000000', borderWidth: 4, stepped: 'before', pointRadius: 2, data: savedHistory.d1 },
+                    { label: 'PASLON 02', borderColor: '#666666', backgroundColor: '#666666', borderWidth: 4, stepped: 'before', pointRadius: 2, data: savedHistory.d2 },
+                    { label: 'PASLON 03', borderColor: '#999999', backgroundColor: '#999999', borderWidth: 2, borderDash: [5, 5], stepped: 'before', pointRadius: 2, data: savedHistory.d3 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        display: true, 
+                        grid: { display: false }, 
+                        ticks: { 
+                            font: { weight: 'bold' },
+                            maxTicksLimit: 10, 
+                            maxRotation: 45
+                        } 
+                    },
+                    y: { beginAtZero: true, grid: { color: '#000000', lineWidth: 1 }, ticks: { font: { weight: 'bold' } } }
+                },
+                plugins: {
+                    legend: { display: true, labels: { font: { weight: 'black', family: 'monospace' }, boxWidth: 20 } }
+                }
+            }
+        });
+
+        async function fetchAndUpdate() {
+            try {
+                const res = await fetch('/api/skor');
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('id-ID');
+
+                const s1 = data.paslon1 || 0;
+                const s2 = data.paslon2 || 0;
+                const s3 = data.paslon3 || 0;
+
+                // Update angka besar di kotak atas (selalu jalan tiap detik)
+                document.getElementById('stat1').innerText = s1;
+                document.getElementById('stat2').innerText = s2;
+                document.getElementById('stat3').innerText = s3;
+
+                // AMBIL DATA SKOR TERAKHIR DARI GRAFIK
+                const lastDataLength = chart.data.datasets[0].data.length;
+                const lastS1 = lastDataLength > 0 ? chart.data.datasets[0].data[lastDataLength - 1] : -1;
+                const lastS2 = lastDataLength > 0 ? chart.data.datasets[1].data[lastDataLength - 1] : -1;
+                const lastS3 = lastDataLength > 0 ? chart.data.datasets[2].data[lastDataLength - 1] : -1;
+
+                // Hanya tambahkan titik ke grafik JIKA ADA SUARA BARU MASUK
+                if (s1 !== lastS1 || s2 !== lastS2 || s3 !== lastS3) {
+                    
+                    // Reset otomatis jika Redis dikosongkan (Skor jadi 0)
+                    if (s1 === 0 && s2 === 0 && s3 === 0 && lastS1 > 0) {
+                        chart.data.labels = [];
+                        chart.data.datasets.forEach(dataset => dataset.data = []);
+                    }
+
+                    // Tambahkan data baru ke grafik
+                    chart.data.labels.push(timeString);
+                    chart.data.datasets[0].data.push(s1);
+                    chart.data.datasets[1].data.push(s2);
+                    chart.data.datasets[2].data.push(s3);
+
+                    if (chart.data.labels.length > 150) {
+                        chart.data.labels.shift();
+                        chart.data.datasets.forEach(dataset => dataset.data.shift());
+                    }
+
+                    localStorage.setItem('ctf_history', JSON.stringify({
+                        labels: chart.data.labels,
+                        d1: chart.data.datasets[0].data,
+                        d2: chart.data.datasets[1].data,
+                        d3: chart.data.datasets[2].data
+                    }));
+
+                    chart.update('none'); 
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Jalankan fetch
+        fetchAndUpdate();
+        setInterval(fetchAndUpdate, 1000); // Fetch tetap tiap detik, tapi GAMBARnya nunggu berubah
+    </script>
+</Layout>

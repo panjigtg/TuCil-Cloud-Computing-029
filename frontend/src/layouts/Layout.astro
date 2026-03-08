@@ -1,30 +1,60 @@
 ---
-interface Props {
+// src/layouts/Layout.astro
+export interface Props {
 	title: string;
 }
 const { title } = Astro.props;
 ---
 
-<!doctype html>
-<html lang="id">
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<title>E-Voting</title>
-		
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
-
+		<title>{title}</title>
 		<script is:inline src="https://cdn.tailwindcss.com"></script>
-
-        <style>
-            body {
-                font-family: 'JetBrains Mono', monospace;
-            }
-        </style>
 	</head>
-	<body class="bg-white text-black min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-gray-300 selection:text-black">
-		<slot />
+	<body class="bg-gray-100 font-sans">
+		<nav class="bg-white border-b-4 border-black p-4 mb-6 sticky top-0 z-50">
+			<div class="max-w-6xl mx-auto flex justify-between items-center">
+				<div class="font-black text-xl tracking-tighter italic">
+					<a href="/">HOKAGE_VOTE</a>
+				</div>
+				<div id="nav-links" class="flex gap-2 md:gap-4 font-bold uppercase text-xs md:text-sm">
+					<a href="/" data-path="/" class="nav-item border-2 border-transparent px-3 py-1 transition-all">Bilik Suara</a>
+					<a href="/scoreboard" data-path="/scoreboard" class="nav-item border-2 border-transparent px-3 py-1 transition-all">Scoreboard</a>
+					<a href="/admin" data-path="/admin" class="nav-item border-2 border-transparent px-3 py-1 transition-all">Admin</a>
+				</div>
+			</div>
+		</nav>
+
+		<div class="flex justify-center items-center py-4">
+			<slot />
+		</div>
+		<script is:inline>
+			function updateActiveNav() {
+				const currentPath = window.location.pathname;
+				const navItems = document.querySelectorAll('.nav-item');
+
+				navItems.forEach(item => {
+					const itemPath = item.getAttribute('data-path');
+					
+					// Logika: Jika path URL cocok dengan data-path tombol
+					// Admin dicocokkan dengan /admin atau /admin/ (trailing slash)
+					if (currentPath === itemPath || (itemPath !== '/' && currentPath.startsWith(itemPath))) {
+						// KELAS AKTIF (Hitam)
+						item.classList.add('bg-black', 'text-white', 'border-black');
+						item.classList.remove('text-black', 'border-transparent');
+					} else {
+						// KELAS TIDAK AKTIF (Putih/Outline)
+						item.classList.remove('bg-black', 'text-white', 'border-black');
+						item.classList.add('text-black', 'border-transparent', 'hover:border-black');
+					}
+				});
+			}
+
+			// Jalankan saat halaman dimuat
+			document.addEventListener('DOMContentLoaded', updateActiveNav);
+		</script>
 	</body>
 </html>
