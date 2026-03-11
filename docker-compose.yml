@@ -29,13 +29,12 @@ services:
   web3:
     build: ./web3
     expose:
-      - "80"
+      - "8080"
     environment:
-      - INSTANCE_NAME=PHP-App
+      - INSTANCE_NAME=Go-App
     networks:
       - app-network
     restart: unless-stopped
-
   nginx:
     image: nginx:alpine
     container_name: nginx-lb
@@ -62,4 +61,4 @@ services:
 
 networks:
   app-network:
-    driver: bridge
+    driver: overlay

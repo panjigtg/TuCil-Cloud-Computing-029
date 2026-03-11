@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Admin - Ruang Hokage">
+    <div class="max-w-4xl mx-auto border-4 border-black p-8 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div class="flex justify-between items-center border-b-4 border-black pb-4 mb-6">
+            <h1 class="text-3xl font-black uppercase">Ruang Hokage</h1>
+            <span class="bg-black text-white px-3 py-1 font-mono text-sm">SERVER GO ADMIN</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center" id="score-container">
+            <div class="border-2 border-black p-4">
+                <h2 class="font-bold uppercase text-gray-500 text-sm mb-1">Kandidat 01</h2>
+                <p class="text-5xl font-black" id="skor1">-</p>
+            </div>
+            <div class="border-2 border-black p-4">
+                <h2 class="font-bold uppercase text-gray-500 text-sm mb-1">Kandidat 02</h2>
+                <p class="text-5xl font-black" id="skor2">-</p>
+            </div>
+            <div class="border-2 border-black p-4 border-dashed bg-gray-50">
+                <h2 class="font-bold uppercase text-gray-500 text-sm mb-1">Kandidat 03</h2>
+                <p class="text-5xl font-black" id="skor3">-</p>
+            </div>
+            <div class="border-2 border-black p-4 bg-black text-white">
+                <h2 class="font-bold uppercase text-gray-300 text-sm mb-1">Total Suara</h2>
+                <p class="text-5xl font-black" id="total-voters">-</p>
+            </div>
+        </div>
+
+        <h3 class="font-bold uppercase mb-2">Riwayat Pemilih Sah:</h3>
+        <div class="border-2 border-black h-64 overflow-y-auto p-4 bg-gray-50 mb-6">
+            <ul id="voters-list" class="list-disc pl-6 font-mono text-lg">
+                <li class='text-gray-400 list-none'>Memuat data...</li>
+            </ul>
+        </div>
+
+        <button onclick="window.print()" class="w-full bg-black text-white font-bold py-4 uppercase border-2 border-transparent hover:bg-white hover:text-black hover:border-black transition-all">
+            Cetak Berita Acara (PDF)
+        </button>
+    </div>
+
+    <script>
+        async function fetchAdminData() {
+            try {
+                const res = await fetch('/api/admin/data');
+                const data = await res.json();
+                
+                document.getElementById('skor1').innerText = data.skor1;
+                document.getElementById('skor2').innerText = data.skor2;
+                document.getElementById('skor3').innerText = data.skor3;
+                document.getElementById('total-voters').innerText = data.total_voters;
+
+                const list = document.getElementById('voters-list');
+                if (data.voters.length > 0) {
+                    list.innerHTML = data.voters.map((v: string) => `<li>${v}</li>`).join('');
+                } else {
+                    list.innerHTML = "<li class='text-gray-400 list-none'>Belum ada suara yang masuk.</li>";
+                }
+            } catch (err) {
+                console.error("Gagal memuat data admin", err);
+            }
+        }
+
+        fetchAdminData();
+        // Opsional: Polling setiap 5 detik agar data realtime
+        setInterval(fetchAdminData, 5000);
+    </script>
+</Layout>

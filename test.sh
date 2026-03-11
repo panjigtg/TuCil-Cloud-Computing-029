@@ -1,13 +1,12 @@
 #!/bin/bash
 
 URL="http://localhost"
-JUMLAH_REQUEST=1000 
+JUMLAH_REQUEST=10000 
 DELAY=0.1       
 
 for ((i=1; i<=JUMLAH_REQUEST; i++))
 do
-    NAMA="siswa_$i"
-    
+    NAMA="batch_$i"
 
     curl -s -X POST "$URL/api/login" \
          -H "Content-Type: application/json" \
@@ -24,5 +23,5 @@ do
     echo "[$i/$JUMLAH_REQUEST] $NAMA memilih Paslon 0$PASLON -> $RESPONSE"
     rm "cookies_$i.txt"
 
-    sleep $DELAY
+    sleep 0
 done
