@@ -1,6 +1,7 @@
 services:
   frontend:
     build: ./frontend
+    image: hokage_frontend:latest
     expose:
       - "80"
     networks:
@@ -8,6 +9,7 @@ services:
     restart: unless-stopped
   web1:
     build: ./web1
+    image: hokage_web1:latest
     expose:
       - "5000"
     environment:
@@ -18,6 +20,7 @@ services:
 
   web2:
     build: ./web2
+    image: hokage_web2:latest
     expose:
       - "3000"
     environment:
@@ -28,6 +31,7 @@ services:
 
   web3:
     build: ./web3
+    image: hokage_web3:latest
     expose:
       - "8080"
     environment:

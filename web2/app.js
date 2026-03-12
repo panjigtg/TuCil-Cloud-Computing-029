@@ -43,6 +43,6 @@ app.post('/api/vote', async (req, res) => {
     res.json({ message: `SUKSES: Suara ${username} masuk!`, server: hostname });
 })
 
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0', () => {
     console.log("server sedang berjalan")
 })
